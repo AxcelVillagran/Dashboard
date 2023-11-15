@@ -40,7 +40,10 @@ let cargarFechaActual = () => {
 let cargarOpenMeteo = () => {
 
     let URL = "https://api.open-meteo.com/v1/forecast?latitude=-2.1962&longitude=-79.8862&hourly=temperature_2m&timezone=auto";
-
+    let URL2 = "https://api.open-meteo.com/v1/forecast?latitude=-2.1962&longitude=-79.8862&hourly=relativehumidity_2m&timezone=auto";
+    /*let respuesta2 = fetch(URL2)
+    let respuesta2text = respuesta2.text();
+    let respuesta2JSON = respuesta2text.json(); */
     fetch(URL)
         .then(responseText => responseText.json())
         .then(responseJSON => {
@@ -68,7 +71,7 @@ let cargarOpenMeteo = () => {
                   },
                   {
                     label: 'Relative Humidity [2m]',
-                    data: data, 
+                    data: data2, 
                   }
                 ]
               },
@@ -157,7 +160,90 @@ let cargarOpenMeteo2 = () => {
     .catch(console.error);
 }
 
+let parseXML = (responseText) => {
+
+  const parser = new DOMParser();
+  const xml = parser.parseFromString(responseText,"application/xml");
+  let forecastElement = document.querySelector("#forecastbody")
+  forecastElement.innerHTML = ''
+  let timeArr = xml.querySelectorAll("time")
+  timeArr.forEach(time => {
+        
+    let from = time.getAttribute("from").replace("T", " ")
+
+    let humidity = time.querySelector("humidity").getAttribute("value")
+    let windSpeed = time.querySelector("windSpeed").getAttribute("mps")
+    let precipitation = time.querySelector("precipitation").getAttribute("probability")
+    let pressure = time.querySelector("pressure").getAttribute("value")
+    let cloud = time.querySelector("clouds").getAttribute("all")
+
+    let template = `
+        <tr>
+            <td>${from}</td>
+            <td>${humidity}</td>
+            <td>${windSpeed}</td>
+            <td>${precipitation}</td>
+            <td>${pressure}</td>
+            <td>${cloud}</td>
+        </tr>
+    `
+
+    //Renderizando la plantilla en el elemento HTML
+    forecastElement.innerHTML += template;
+})
+  console.log(xml);
+}
+
+let selectListener = async (event) => {
+
+  let selectedCity = event.target.value;
+  let cityStorage = localStorage.getItem(selectedCity);
+  
+  if (cityStorage==null){
+  try {
+    let APIkey = "2e9e59a323a5bcce0c24581ea4755f0b";
+    let url = `https://api.openweathermap.org/data/2.5/forecast?q=${selectedCity}&mode=xml&appid=${APIkey}`
+    let response = await fetch(url);
+    let responseText = await response.text();
+
+    await parseXML(responseText);
+    await localStorage.setItem(selectedCity,responseText);
+
+  }catch (error){
+
+    console.log(error);
+  }
+  
+  }else{
+    parseXML(cityStorage);
+  }
+  console.log(selectedCity);
+}
+
+let loadForecastByCity = () => {
+
+  let selectElement = document.querySelector("select")
+  selectElement.addEventListener("change", selectListener)
+}
+let loadExternalTable = async() => {
+
+  let proxyURL = 'https://cors-anywhere.herokuapp.com/'
+  let URLTabla = 'https://www.gestionderiesgos.gob.ec/monitoreo-de-inundaciones/'
+  let endpoint = proxyURL + URLTabla
+  let respuesta = await fetch(endpoint)
+  let respuestaText = await respuesta.text()
+  const parser = await new DOMParser();
+  const xml2 = await parser.parseFromString(respuestaText,"text/html");
+  let elementoXML = await xml2.querySelector("#postcontent table")
+  let elementoDOM = document.getElementById("monitoreo")
+  elementoDOM.innerHTML = elementoXML.outerHTML
+}
+
+
+
 cargarPrecipitacion()
 cargarFechaActual()
 cargarOpenMeteo()
 //cargarOpenMeteo2()
+loadForecastByCity()
+loadExternalTable()
