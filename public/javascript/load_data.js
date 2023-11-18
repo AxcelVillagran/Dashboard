@@ -2,7 +2,71 @@ import {tiempoArr, precipitacionArr, uvArr, temperaturaArr} from './static_data.
 
 let fechaActual = () => new Date().toISOString().slice(0,10);
 
-let cargarPrecipitacion = () => {
+let cargarTabla = () => {
+
+  let URLGyeActual = "https://api.open-meteo.com/v1/forecast?latitude=-2.1962&longitude=-79.8862&hourly=temperature_2m,precipitation_probability,uv_index"
+  fetch(URLGyeActual)
+        .then(responseText => responseText.json())
+        .then(responseJSON => {
+
+          let arrTime = responseJSON.hourly.time
+          let arrTemp = responseJSON.hourly.temperature_2m
+          let arrPrecip = responseJSON.hourly.precipitation_probability
+          let arrUv = responseJSON.hourly.uv_index
+          let actual = fechaActual();
+          let datosPrecip = [];
+          let datosTemp = [];
+          let datosUv = [];
+
+          for(let index = 0; index<arrTime.length; index++){
+              const tiempo = arrTime[index];
+              const precipitacion = arrPrecip[index];
+              const temp = arrTemp[index];
+              const uv = arrUv[index];
+              if(tiempo.includes(actual)){
+                  datosPrecip.push(precipitacion);
+                  datosTemp.push(temp);
+                  datosUv.push(uv);
+              }
+          }
+          let max = Math.max(...datosPrecip); let maxT = Math.max(...datosTemp); let maxU = Math.max(...datosUv);
+          let min = Math.min(...datosPrecip); let minT = Math.min(...datosTemp); let minU = Math.min(...datosUv);
+          let sum = datosPrecip.reduce((a, b) => a + b, 0); let sumT = datosTemp.reduce((a, b) => a + b, 0); let sumU = datosUv.reduce((a, b) => a + b, 0);
+          let prom = (sum / datosPrecip.length) || 0 ;
+          let promT = (sumT / datosTemp.length) || 0 ;
+          let promU =  (sumU / datosUv.length) || 0 ;
+          let precipitacionMinValue = document.getElementById("precipitacionMinValue");
+          let precipitacionPromValue = document.getElementById("precipitacionPromValue");
+          let precipitacionMaxValue = document.getElementById("precipitacionMaxValue");
+
+          precipitacionMinValue.textContent = `Min ${min} [mm]`;
+          precipitacionMaxValue.textContent = `Max ${max} [mm]`;
+          precipitacionPromValue.textContent = `Prom ${ Math.round(prom * 100) / 100 } [mm]`;
+
+          let tempMaxValue = document.getElementById("temperaturaMaxValue");
+          let tempMinValue = document.getElementById("temperaturaMinValue");
+          let tempPromValue = document.getElementById("temperaturaPromValue");
+
+          tempMinValue.textContent = `Min ${minT} [°C]`;
+          tempMaxValue.textContent = `Max ${maxT} [°C]`;
+          tempPromValue.textContent = `Prom ${ Math.round(promT * 100) / 100 } [°C]`;
+
+          let uvMaxValue = document.getElementById("uvMaxValue");
+          let uvMinValue = document.getElementById("uvMinValue");
+          let uvPromValue = document.getElementById("uvPromValue");
+
+          uvMinValue.textContent = `Min ${minU} [--]`;
+          uvMaxValue.textContent = `Max ${maxU} [--]`;
+          uvPromValue.textContent = `Prom ${ Math.round(promU * 100) / 100 } [--]`;
+
+          
+          
+
+})
+}
+
+
+/*let cargarPrecipitacion = () => {
 
     let actual = fechaActual();
     let datos = [];
@@ -27,7 +91,7 @@ let cargarPrecipitacion = () => {
     precipitacionMaxValue.textContent = `Max ${max} [mm]`;
     precipitacionPromValue.textContent = `Prom ${ Math.round(prom * 100) / 100 } [mm]`;
 }
-
+*/
 
 
 let cargarFechaActual = () => {
@@ -40,25 +104,22 @@ let cargarFechaActual = () => {
 let cargarOpenMeteo = () => {
 
     let URL = "https://api.open-meteo.com/v1/forecast?latitude=-2.1962&longitude=-79.8862&hourly=temperature_2m&timezone=auto";
-    let URL2 = "https://api.open-meteo.com/v1/forecast?latitude=-2.1962&longitude=-79.8862&hourly=relativehumidity_2m&timezone=auto";
     /*let respuesta2 = fetch(URL2)
     let respuesta2text = respuesta2.text();
     let respuesta2JSON = respuesta2text.json(); */
     fetch(URL)
         .then(responseText => responseText.json())
         .then(responseJSON => {
-        
             //Respuesta en formato JSON
         
             //Referencia al elemento con el identificador plot
             let plotRef = document.getElementById('plot1');
         
             //Etiquetas del gráfico
-            let labels = responseJSON.hourly.time;
+            let labels = responseJSON.hourly.time.slice(0,24);
         
             //Etiquetas de los datos
             let data = responseJSON.hourly.temperature_2m;
-            let data2 = responseJSON.hourly.relativehumidity_2m;
             //Objeto de configuración del gráfico
             let config = {
               type: 'line',
@@ -67,12 +128,11 @@ let cargarOpenMeteo = () => {
                 datasets: [
                   {
                     label: 'Temperature [2m]',
-                    data: data, 
+                    data: data,
+                    fill:false,
+                    borderColor: 'rgb(99, 207, 207)',
+                    tension:0.1 
                   },
-                  {
-                    label: 'Relative Humidity [2m]',
-                    data: data2, 
-                  }
                 ]
               },
             };
@@ -81,48 +141,15 @@ let cargarOpenMeteo = () => {
             let chart1  = new Chart(plotRef, config);
         
           })
-          /*let URL2 = "https://api.open-meteo.com/v1/forecast?latitude=-2.1962&longitude=-79.8862&hourly=relativehumidity_2m&timezone=auto";
 
-          fetch(URL2)
-              .then(responseText => responseText.json())
-              .then(responseJSON => {
-              
-                  //Respuesta en formato JSON
-              
-                  //Referencia al elemento con el identificador plot
-                  let plotRef = document.getElementById('plot2');
-              
-                  //Etiquetas del gráfico
-                  let labels = responseJSON.hourly.time;
-              
-                  //Etiquetas de los datos
-                  let data = responseJSON.hourly.relativehumidity_2m;
-                  let data2= responseJSON.hourly.temperature_2m
-                  //Objeto de configuración del gráfico
-                  let config2 = {
-                    type: 'line',
-                    data: {
-                      labels: labels, 
-                      datasets: [
-                        {
-                          label: 'relativehumidity_2m',
-                          data: data, 
-                        }
-                      ]
-                    }
-                  };
-              
-                  //Objeto con la instanciación del gráfico
-                  let chart2  = new Chart(plotRef, config2);
-              
-                })  
-                */    
+          
+                
     .catch(console.error);
 }
 
 let cargarOpenMeteo2 = () => {
 
-    let URL = "https://api.open-meteo.com/v1/forecast?latitude=-2.1962&longitude=-79.8862&hourly=precipitation_probability&timezone=auto";
+  let URL = "https://api.open-meteo.com/v1/forecast?latitude=-2.1962&longitude=-79.8862&hourly=relativehumidity_2m&timezone=auto";
 
     fetch(URL)
         .then(responseText => responseText.json())
@@ -134,20 +161,29 @@ let cargarOpenMeteo2 = () => {
             let plotRef = document.getElementById('plot2');
         
             //Etiquetas del gráfico
-            let labels = responseJSON.hourly.time;
+            let labels = responseJSON.hourly.time.slice(0,24);
         
             //Etiquetas de los datos
             let data = responseJSON.hourly.relativehumidity_2m;
         
             //Objeto de configuración del gráfico
             let config = {
-              type: 'line',
+              type: 'bar',
               data: {
                 labels: labels, 
                 datasets: [
                   {
                     label: 'relativehumidity_2m',
                     data: data, 
+                    fill:false,
+                    borderColor: "#18d697",
+                    backgroundColor: [
+                      'rgba(54, 34, 240, 0.3)',
+                      'rgba(68, 240, 34, 0.3)',
+                      'rgba(255, 150, 203, 0.3)',
+                      'rgba(75, 192, 192, 0.3)',
+                    ],
+                    borderWidth: 3
                   }
                 ]
               }
@@ -215,6 +251,7 @@ let selectListener = async (event) => {
   }
   
   }else{
+    console.log(cityStorage);
     parseXML(cityStorage);
   }
   console.log(selectedCity);
@@ -241,9 +278,9 @@ let loadExternalTable = async() => {
 
 
 
-cargarPrecipitacion()
+cargarTabla()
 cargarFechaActual()
 cargarOpenMeteo()
-//cargarOpenMeteo2()
+cargarOpenMeteo2()
 loadForecastByCity()
 loadExternalTable()

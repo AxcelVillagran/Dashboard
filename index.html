@@ -68,7 +68,10 @@
                     <div class="col">
                         <div class="card">
                             <div class="card-body">
-                                <h5 class="card-title">Precipitación</h5>
+                                <div>
+                                    <h5 class="card-title"><i class="fa-solid fa-cloud-rain"></i> Precipitación</h5>
+                                
+                                </div>
                                 <p class="card-text">
                                     <ul class="list-group list-group-light">
                                         <li id="precipitacionMinValue" class="list-group-item">Min 0.0 [mm]</li>
@@ -82,7 +85,7 @@
                     <div class="col">
                         <div class="card">
                             <div class="card-body">
-                                <h5 class="card-title">Uv</h5>
+                                <h5 class="card-title"><i class="fa-solid fa-sun"></i> Uv</h5>
                                 <p class="card-text">
                                     <ul class="list-group list-group-light">
                                         <li id="uvMinValue" class="list-group-item">Min 0.0 [--]</li>
@@ -96,7 +99,7 @@
                     <div class="col">
                         <div class="card">
                             <div class="card-body">
-                                <h5 class="card-title">Temperatura</h5>
+                                <h5 class="card-title"><i class="fa-solid fa-temperature-three-quarters"></i> Temperatura </h5>
                                 <p class="card-text">
                                     <ul class="list-group list-group-light">
                                         <li id="temperaturaMinValue" class="list-group-item">Min 0.0 [°C]</li>
@@ -143,7 +146,7 @@
                                     ciudad</h5>
                                 <table id="forecast"
                                     class="table align-middle mb-0 bg-white">
-                                    <thead class="bg-light">
+                                    <thead>
                                         <tr>
                                             <th>Hora</th>
                                             <th>Humedad [%]</th>
@@ -166,11 +169,11 @@
         <!-- Graficos-->
         <section class="p-4 text-right bg-light">
             <h4 id="graficos" class="mb-3">
-                Gráficos
+                Gráficos del día
             </h4>
             <div class="container">
                 <div
-                    class="row d-flex justify-content-center row-cols-1 row-cols-md-1 g-4 mt-2">
+                    class="row d-flex justify-content-center row-cols-1 row-cols-md-1 g-4 mt-2" id="plots">
                     <div class="col">
                         <canvas id="plot1"></canvas>
                     </div>

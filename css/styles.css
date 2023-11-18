@@ -1,3 +1,9 @@
-tabla.default tr:not :nth-child(1):not :nth-child(2){
+table.default tr:not(:nth-child(1)):not(:nth-child(2)) {
     display: none;
-} 
+}
+
+thead {
+    background-color: #63cfcf;
+}
+
+
